@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public", "auth"]
+}
+
+enum Era {
+  Apostolic
+  Patristic
+  Medieval
+  Modern
+
+  @@schema("public")
+}
+
+model Martyr {
+  id          Int     @id @default(autoincrement())
+  name        String
+  title       String?
+  feastDay    String
+  year        String
+  era         Era
+  iconUrl     String
+  description String
+  prayer      String
+
+  @@schema("public")
+}
+
+model ChurchImage {
+  id          Int     @id @default(autoincrement())
+  url         String
+  alt         String
+  description String
+
+  @@schema("public")
+}
+
+model TimelineCentury {
+  id      Int             @id @default(autoincrement())
+  century String
+  entries TimelineEntry[]
+
+  @@schema("public")
+}
+
+model TimelineEntry {
+  id          Int               @id @default(autoincrement())
+  name        String
+  year        String
+  description String
+  century     TimelineCentury   @relation(fields: [centuryId], references: [id])
+  centuryId   Int
+
+  @@schema("public")
+}
+
+model Testimony {
+  id      Int      @id @default(autoincrement())
+  name    String
+  title   String
+  content String    @db.Text
+  date    DateTime
+
+  @@schema("public")
+}
+
+model Donation {
+  id              Int       @id @default(autoincrement())
+  userId          Int       // if you have users
+  amount          Decimal
+  currency        String
+  stripeSessionId String    @unique
+  createdAt       DateTime  @default(now())
+
+  @@schema("public")
+}
