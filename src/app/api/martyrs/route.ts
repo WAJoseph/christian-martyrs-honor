@@ -18,10 +18,29 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Authenticate admin
+  const { getUserFromRequest, isAdmin } = await import(
+    "../../../../lib/supabaseAdmin"
+  );
+  const user = await getUserFromRequest(request);
+  if (!user || !isAdmin(user)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const body = await request.json();
-    const { name, title, feastDay, year, era, iconUrl, description, prayer } =
-      body;
+    const {
+      name,
+      title,
+      feastDay,
+      year,
+      era,
+      iconUrl,
+      description,
+      prayer,
+      story = "",
+      iconDescription = "",
+      intercessoryPrayer = "",
+    } = body;
 
     const martyr = await prisma.martyr.create({
       data: {
@@ -33,6 +52,9 @@ export async function POST(request: NextRequest) {
         iconUrl,
         description,
         prayer,
+        story,
+        iconDescription,
+        intercessoryPrayer,
       },
     });
 
@@ -51,11 +73,30 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Authenticate admin
+  const { getUserFromRequest, isAdmin } = await import(
+    "../../../../lib/supabaseAdmin"
+  );
+  const user = await getUserFromRequest(request);
+  if (!user || !isAdmin(user)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { name, title, feastDay, year, era, iconUrl, description, prayer } =
-      body;
+    const {
+      name,
+      title,
+      feastDay,
+      year,
+      era,
+      iconUrl,
+      description,
+      prayer,
+      story = "",
+      iconDescription = "",
+      intercessoryPrayer = "",
+    } = body;
 
     const martyr = await prisma.martyr.update({
       where: { id },
@@ -68,6 +109,9 @@ export async function PUT(
         iconUrl,
         description,
         prayer,
+        story,
+        iconDescription,
+        intercessoryPrayer,
       },
     });
 
@@ -85,6 +129,14 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Authenticate admin
+  const { getUserFromRequest, isAdmin } = await import(
+    "../../../../lib/supabaseAdmin"
+  );
+  const user = await getUserFromRequest(request);
+  if (!user || !isAdmin(user)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const id = parseInt(params.id);
 

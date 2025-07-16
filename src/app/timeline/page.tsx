@@ -1,45 +1,43 @@
 // src/app/timeline/page.tsx
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'   // Optional: if you want an icon for “Read Full Story”
+import Navigation from "@/components/ui/Navigation";
+import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react"; // Optional: if you want an icon for “Read Full Story”
+import { usePageTransitionContext } from "@/components/Providers";
 
-const timelineData: any = [
-  {
-    century: "1st Century",
-    martyrs: [
-      { name: "St. Stephen", year: "AD 36", description: "First Christian martyr, stoned in Jerusalem" },
-      { name: "St. James", year: "AD 62", description: "Brother of Jesus, thrown from temple" },
-    ]
-  },
-  {
-    century: "2nd Century", 
-    martyrs: [
-      { name: "St. Ignatius", year: "AD 108", description: "Bishop of Antioch, fed to lions in Rome" },
-      { name: "St. Polycarp", year: "AD 155", description: "Bishop of Smyrna, burned at stake" },
-    ]
-  },
-  {
-    century: "3rd Century",
-    martyrs: [
-      { name: "St. Perpetua", year: "AD 203", description: "Young mother martyred in Carthage" },
-      { name: "St. Lawrence", year: "AD 258", description: "Deacon martyred during Valerian persecution" },
-    ]
-  },
-  {
-    century: "4th Century",
-    martyrs: [
-      { name: "St. Sebastian", year: "AD 288", description: "Roman soldier martyred by arrows" },
-      { name: "St. Agnes", year: "AD 304", description: "Young virgin martyred in Rome" },
-    ]
-  }
-]
+interface TimelineMartyr {
+  name: string;
+  year: string;
+  description: string;
+}
+
+interface TimelineCentury {
+  century: string;
+  martyrs: TimelineMartyr[];
+}
 
 export default function TimelinePage() {
-  const [selectedCentury, setSelectedCentury] = useState<string | null>(null)
+  const [timeline, setTimeline] = useState<TimelineCentury[]>([]);
+  const [selectedCentury, setSelectedCentury] = useState<string | null>(null);
+  const { setLoading } = usePageTransitionContext();
+
+  useEffect(() => {
+    setLoading(false);
+  }, [setLoading]);
+
+  useEffect(() => {
+    async function fetchTimeline() {
+      const res = await fetch("/api/timeline");
+      const data: TimelineCentury[] = await res.json();
+      setTimeline(data);
+    }
+    fetchTimeline();
+  }, []);
 
   return (
     <div className="min-h-screen pt-30 pb-12 px-6">
+      <Navigation />
       {/* Header */}
       <div className="max-w-4xl mx-auto text-center mb-12">
         <h1 className="font-liturgical text-5xl font-bold gold-text mb-4">
@@ -55,7 +53,7 @@ export default function TimelinePage() {
         {/* Vertical Line */}
         <div className="absolute left-8 top-0 bottom-0 w-[1px] bg-timeline-gradient" />
 
-        {timelineData.map((period: any, idx: any) => (
+        {timeline.map((period, idx) => (
           <div key={period.century} className="relative mb-16 last:mb-0">
             {/* Century Marker */}
             <div className="flex items-center mb-6">
@@ -74,13 +72,13 @@ export default function TimelinePage() {
 
             {/* Martyrs Cards */}
             <div className="ml-20 space-y-4">
-              {period.martyrs.map((martyr: any) => {
-                const isOpen = selectedCentury === period.century
+              {period.martyrs.map((martyr) => {
+                const isOpen = selectedCentury === period.century;
                 return (
                   <div
                     key={martyr.name}
                     className={`scroll-panel p-6 cursor-pointer transition-all duration-300 hover:scale-105 ${
-                      isOpen ? 'animate-glow' : ''
+                      isOpen ? "animate-glow" : ""
                     }`}
                     onClick={() =>
                       setSelectedCentury(isOpen ? null : period.century)
@@ -90,7 +88,7 @@ export default function TimelinePage() {
                       <div className="icon-frame p-2 flex-shrink-0">
                         <div className="icon-inner w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
                           <span className="gold-text font-liturgical font-bold text-sm">
-                            {martyr.year.replace('AD ', '')}
+                            {martyr.year.replace("AD ", "")}
                           </span>
                         </div>
                       </div>
@@ -112,7 +110,7 @@ export default function TimelinePage() {
                       </div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -126,7 +124,9 @@ export default function TimelinePage() {
             Continue the Legacy
           </h3>
           <p className="text-slate-300 mb-6 leading-relaxed">
-            The witness of the martyrs continues to inspire faith across generations. Discover how their courage can strengthen your own spiritual journey.
+            The witness of the martyrs continues to inspire faith across
+            generations. Discover how their courage can strengthen your own
+            spiritual journey.
           </p>
           <button className="icon-frame px-6 py-3 transition-all duration-300 hover:scale-105">
             <div className="icon-inner px-4 py-2">
@@ -138,5 +138,5 @@ export default function TimelinePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

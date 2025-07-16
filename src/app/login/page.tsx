@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../context/AuthContext";
+import { Church } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,8 +17,13 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
+    if (
+      user &&
+      (user.role === "admin" || user.app_metadata?.role === "admin")
+    ) {
       router.push("/admin");
+    } else if (user) {
+      router.push("/");
     }
   }, [user, router]);
 
@@ -36,7 +42,7 @@ export default function LoginPage() {
       } else if (data.user) {
         router.push("/admin");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -48,18 +54,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="orthodox-border bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-          <h1 className="text-3xl font-bold text-center mb-8 gold-text">
-            Christian Martyrs Honor
-          </h1>
+        <div className="scroll-panel p-8 rounded-2xl shadow-2xl relative">
+          <div className="flex flex-col items-center mb-8">
+            <span className="icon-frame p-3 mb-2">
+              <Church size={32} className="gold-text" />
+            </span>
+            <h1 className="text-3xl font-bold gold-text text-center drop-shadow-sm">
+              Christian Martyrs Honor
+            </h1>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-slate-200 mb-2"
               >
                 Email
               </label>
@@ -69,7 +80,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 border border-amber-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 text-slate-900"
                 placeholder="Enter your email"
               />
             </div>
@@ -77,7 +88,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-slate-200 mb-2"
               >
                 Password
               </label>
@@ -87,7 +98,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 border border-amber-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 text-slate-900"
                 placeholder="Enter your password"
               />
             </div>
@@ -101,11 +112,11 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-medium py-2 px-4 rounded-md transition duration-200 flex items-center justify-center"
+              className="w-full bg-gold-texture hover:bg-amber-400 disabled:bg-amber-200 gold-text font-semibold py-2 px-4 rounded-md transition duration-200 flex items-center justify-center shadow-md border border-amber-400"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-700 mr-2"></div>
                   {isSignUp ? "Creating Account..." : "Signing In..."}
                 </>
               ) : isSignUp ? (
@@ -122,7 +133,7 @@ export default function LoginPage() {
                   setIsSignUp(!isSignUp);
                   setError(null);
                 }}
-                className="text-amber-600 hover:text-amber-700 text-sm font-medium"
+                className="text-amber-400 hover:text-amber-500 text-sm font-medium underline underline-offset-2"
               >
                 {isSignUp
                   ? "Already have an account? Sign in"

@@ -1,10 +1,15 @@
 // src/app/api/testimonies/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { getUserFromRequest } from "../../../../lib/supabaseAdmin";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const showAll = url.searchParams.get("all");
+    const where = showAll ? {} : { status: "approved" };
     const testimonies = await prisma.testimony.findMany({
+      where,
       orderBy: { date: "desc" },
     });
     return NextResponse.json(testimonies);
@@ -18,16 +23,31 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Require authentication
+  const user = await getUserFromRequest(request);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const body = await request.json();
-    const { name, title, content, date } = body;
-
+    let { name, title, content, date } = body;
+    // Basic input validation and sanitization
+    name = (name || "").toString().trim().slice(0, 64);
+    title = (title || "").toString().trim().slice(0, 128);
+    content = (content || "").toString().trim().slice(0, 2000);
+    if (!name || !title || !content) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
     const testimony = await prisma.testimony.create({
       data: {
         name,
         title,
         content,
         date: new Date(date),
+        status: "pending", // All new testimonies are pending
       },
     });
 

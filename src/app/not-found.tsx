@@ -1,11 +1,14 @@
 // src/app/not-found.tsx
 
-import Navigation from '@/components/ui/Navigation'
-import Link from 'next/link'
+import Navigation from "@/components/ui/Navigation";
+import Link from "next/link";
 
 export default function NotFoundPage() {
-  // Server-side log:
-  console.error('404: Page not found —', typeof window === 'undefined' ? 'server' : 'client')
+  // Only log on the server to avoid hydration errors
+  if (typeof window === "undefined") {
+    // eslint-disable-next-line no-console
+    console.error("404: Page not found — server");
+  }
 
   return (
     <div className="min-h-screen flex flex-col pt-24 pb-12 px-6">
@@ -30,5 +33,5 @@ export default function NotFoundPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
