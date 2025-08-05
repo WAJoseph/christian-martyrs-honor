@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 // src/app/api/martyrs/[id]/route.ts
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Authenticate admin
   const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
@@ -86,7 +86,8 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const idNum = parseInt(id);
     const body = await request.json();
     const {
       name,
@@ -103,7 +104,7 @@ export async function PUT(
     } = body;
 
     const martyr = await prisma.martyr.update({
-      where: { id },
+      where: { id: idNum },
       data: {
         name,
         title,
@@ -131,7 +132,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Authenticate admin
   const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
@@ -144,10 +145,11 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const idNum = parseInt(id);
 
     await prisma.martyr.delete({
-      where: { id },
+      where: { id: idNum },
     });
 
     return NextResponse.json({ message: "Martyr deleted successfully" });

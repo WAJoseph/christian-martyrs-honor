@@ -4,11 +4,12 @@ import { prisma } from "../../../../../../lib/prisma";
 // GET, PUT, DELETE for a single TimelineCentury by id
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
+  const { id } = await context.params;
+  const idNum = Number(id);
   const century = await prisma.timelineCentury.findUnique({
-    where: { id },
+    where: { id: idNum },
   });
   if (!century)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -17,7 +18,7 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const { getUserFromRequest, isAdmin } = await import(
     "../../../../../../lib/supabaseAdmin"
@@ -26,16 +27,17 @@ export async function PUT(
   if (!user || !isAdmin(user)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const id = Number(params.id);
+  const { id } = await context.params;
+  const idNum = Number(id);
   const data = await req.json();
   const century = Number(data.century);
   if (isNaN(century)) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const result = await prisma.timelineCentury.update({
-    where: { id },
+    where: { id: idNum },
     data: {
-      century: Number(century),
+      century: String(century),
     },
   });
   return NextResponse.json(result);
@@ -43,7 +45,7 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const { getUserFromRequest, isAdmin } = await import(
     "../../../../../../lib/supabaseAdmin"
@@ -52,7 +54,8 @@ export async function DELETE(
   if (!user || !isAdmin(user)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const id = Number(params.id);
-  await prisma.timelineCentury.delete({ where: { id } });
+  const { id } = await context.params;
+  const idNum = Number(id);
+  await prisma.timelineCentury.delete({ where: { id: idNum } });
   return NextResponse.json({ success: true });
 }

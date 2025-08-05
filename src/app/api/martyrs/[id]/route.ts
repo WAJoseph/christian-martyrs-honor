@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 
-// GET a single martyr by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  console.log("GET /api/martyrs/[id] called with id:", params.id);
+  const { id } = await context.params;
+  console.log("GET /api/martyrs/[id] called with id:", id);
   try {
-    const id = parseInt(params.id, 10);
-    if (isNaN(id)) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
     const martyr = await prisma.martyr.findUnique({
-      where: { id },
+      where: { id: idNum },
     });
     if (!martyr) {
       return NextResponse.json({ error: "Martyr not found" }, { status: 404 });
@@ -31,12 +31,13 @@ export async function GET(
 // PUT update a martyr by ID
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  console.log("PUT /api/martyrs/[id] called with id:", params.id);
+  const { id } = await context.params;
+  console.log("PUT /api/martyrs/[id] called with id:", id);
   try {
-    const id = parseInt(params.id, 10);
-    if (isNaN(id)) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
     const data = await request.json();
@@ -55,7 +56,7 @@ export async function PUT(
       intercessoryPrayer = "",
     } = data;
     const updatedMartyr = await prisma.martyr.update({
-      where: { id },
+      where: { id: idNum },
       data: {
         name,
         title,
@@ -83,16 +84,17 @@ export async function PUT(
 // DELETE a martyr by ID
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  console.log("DELETE /api/martyrs/[id] called with id:", params.id);
+  const { id } = await context.params;
+  console.log("DELETE /api/martyrs/[id] called with id:", id);
   try {
-    const id = parseInt(params.id, 10);
-    if (isNaN(id)) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
     await prisma.martyr.delete({
-      where: { id },
+      where: { id: idNum },
     });
     return NextResponse.json({ success: true });
   } catch (error) {

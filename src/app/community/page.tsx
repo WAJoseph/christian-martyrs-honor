@@ -20,6 +20,8 @@ interface Testimony {
   title: string;
   content: string;
   date: string;
+  status?: string;
+  featured?: boolean;
 }
 
 export default function Community() {
@@ -43,11 +45,11 @@ export default function Community() {
       try {
         const res = await fetch("/api/testimonies");
         if (res.ok) {
-          const data = await res.json();
+          const data: Testimony[] = await res.json();
           // Only show approved testimonies, featured first
-          const approved = data.filter((t: any) => t.status === "approved");
-          const featured = approved.filter((t: any) => t.featured);
-          const nonFeatured = approved.filter((t: any) => !t.featured);
+          const approved = data.filter((t) => t.status === "approved");
+          const featured = approved.filter((t) => t.featured);
+          const nonFeatured = approved.filter((t) => !t.featured);
           setTestimonies([...featured, ...nonFeatured]);
         }
       } catch {
@@ -74,7 +76,7 @@ export default function Community() {
         return;
       }
       // If allowed, submit to API as normal
-      let headers: Record<string, string> = {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
       const token = await getAccessToken();

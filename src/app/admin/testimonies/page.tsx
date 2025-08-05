@@ -8,7 +8,6 @@ const getAccessToken = async () => {
   const session = (await supabase.auth.getSession()).data.session;
   return session?.access_token || "";
 };
-import Link from "next/link";
 import { useAuth } from "../../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -35,7 +34,7 @@ interface Testimony {
 }
 
 export default function TestimoniesPage() {
-  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+  const [showFeaturedOnly] = useState(false);
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
@@ -88,7 +87,7 @@ export default function TestimoniesPage() {
     newStatus: "approved" | "rejected"
   ) => {
     try {
-      const testimony = testimonies.find((t) => t.id === id);
+      const testimony = testimonies.find((t) => t.id === Number(id));
       if (!testimony) return;
       const token = await getAccessToken();
       const res = await fetch(`/api/testimonies/${id}`, {
@@ -101,7 +100,9 @@ export default function TestimoniesPage() {
       });
       if (res.ok) {
         setTestimonies((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
+          prev.map((t) =>
+            t.id === Number(id) ? { ...t, status: newStatus } : t
+          )
         );
       }
     } catch {}
@@ -598,9 +599,15 @@ export default function TestimoniesPage() {
               <div className="flex items-center justify-between text-sm text-amber-300/70 pt-4 border-t border-amber-500/20">
                 <span>
                   Submitted:{" "}
-                  {new Date(
-                    selectedTestimony.date || selectedTestimony.created_at
-                  ).toLocaleDateString()}
+                  {(() => {
+                    const dateStr =
+                      selectedTestimony.date || selectedTestimony.created_at;
+                    if (!dateStr) return "Unknown";
+                    const dateObj = new Date(dateStr);
+                    return isNaN(dateObj.getTime())
+                      ? "Unknown"
+                      : dateObj.toLocaleDateString();
+                  })()}
                 </span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${

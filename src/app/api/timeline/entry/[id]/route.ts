@@ -1,22 +1,29 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../../../lib/prisma";
 
-// GET, PUT, DELETE for a single TimelineEntry by id
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
+  const { id } = await context.params;
+  const idNum = Number(id);
+  if (isNaN(idNum)) {
+    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+  }
   const entry = await prisma.timelineEntry.findUnique({
-    where: { id },
+    where: { id: idNum },
     include: { century: true },
   });
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(entry);
 }
 
-export async function PUT(req: Request, context: any) {
-  const { params } = await context;
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  const idNum = Number(id);
   const { getUserFromRequest, isAdmin } = await import(
     "../../../../../../lib/supabaseAdmin"
   );
@@ -24,12 +31,17 @@ export async function PUT(req: Request, context: any) {
   if (!user || !isAdmin(user)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const id = Number(params.id);
+  if (isNaN(idNum)) {
+    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+  }
   const data = await req.json();
   // Basic input validation
-  const name = (data.name || "").toString().trim().slice(0, 128);
-  const year = (data.year || "").toString().trim().slice(0, 16);
-  const description = (data.description || "").toString().trim().slice(0, 2000);
+  const normName = (data.name || "").toString().trim().slice(0, 128);
+  const normYear = (data.year || "").toString().trim().slice(0, 16);
+  const normDescription = (data.description || "")
+    .toString()
+    .trim()
+    .slice(0, 2000);
   const centuryId = Number(data.centuryId);
   const martyrId =
     data.martyrId !== undefined &&
@@ -37,15 +49,15 @@ export async function PUT(req: Request, context: any) {
     data.martyrId !== ""
       ? Number(data.martyrId)
       : null;
-  if (!name || !year || !description || isNaN(centuryId)) {
+  if (!normName || !normYear || !normDescription || isNaN(centuryId)) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const entry = await prisma.timelineEntry.update({
-    where: { id },
+    where: { id: idNum },
     data: {
-      name,
-      year,
-      description,
+      name: normName,
+      year: normYear,
+      description: normDescription,
       centuryId,
       martyrId,
     },
@@ -55,8 +67,10 @@ export async function PUT(req: Request, context: any) {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
+  const idNum = Number(id);
   const { getUserFromRequest, isAdmin } = await import(
     "../../../../../../lib/supabaseAdmin"
   );
@@ -64,7 +78,16 @@ export async function DELETE(
   if (!user || !isAdmin(user)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const id = Number(params.id);
-  await prisma.timelineEntry.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  if (isNaN(idNum)) {
+    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+  }
+  try {
+    await prisma.timelineEntry.delete({ where: { id: idNum } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Not found or already deleted" },
+      { status: 404 }
+    );
+  }
 }

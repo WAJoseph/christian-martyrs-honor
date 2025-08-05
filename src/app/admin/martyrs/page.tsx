@@ -9,6 +9,7 @@ const getAccessToken = async () => {
   return session?.access_token || "";
 };
 import { Era } from "../../../../generated/prisma";
+import Image from "next/image";
 
 interface Martyr {
   id: number;
@@ -404,19 +405,26 @@ export default function MartyrsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-slate-900/80 divide-y divide-amber-900">
-                  {martyrs.map((m, idx) => (
+                  {martyrs.map((m) => (
                     <tr
                       key={m.id}
                       className="hover:bg-amber-900/20 last:rounded-b-2xl"
                     >
                       <td className="px-6 py-4 whitespace-nowrap flex items-center">
-                        <img
-                          src={m.iconUrl}
+                        <Image
+                          src={m.iconUrl || "/placeholder-icon.jpg"}
                           alt={m.name}
-                          onError={(e) => {
-                            e.currentTarget.src = "/placeholder-icon.jpg";
-                          }}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-full border-2 border-amber-700 object-cover"
+                          onError={(e) => {
+                            if (
+                              e.currentTarget.src !== "/placeholder-icon.jpg"
+                            ) {
+                              e.currentTarget.src = "/placeholder-icon.jpg";
+                            }
+                          }}
+                          unoptimized
                         />
                         <div className="ml-4">
                           <div className="text-sm font-medium text-amber-100">

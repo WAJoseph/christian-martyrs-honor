@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { useEffect } from "react";
+import { ArrowDown } from "lucide-react";
 import Navigation from "@/components/ui/Navigation";
-import { useRouter } from "next/navigation";
 import { usePageTransitionContext } from "@/components/Providers";
 import OrthodoxCross from "./_components/OrthodoxCross";
 import AboutSection from "./_components/AboutSection";
@@ -143,7 +142,6 @@ export default function HomePage() {
           description: churchImages[1].description,
         }}
       />
-
     </div>
   );
 }

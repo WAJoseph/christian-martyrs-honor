@@ -1,16 +1,9 @@
 // src/app/admin/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "../../../lib/supabaseClient";
-// Helper to get access token
-const getAccessToken = async () => {
-  const session = (await supabase.auth.getSession()).data.session;
-  return session?.access_token || "";
-};
+import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
-import { signOut } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 interface AdminUser {
@@ -23,7 +16,6 @@ interface AdminUser {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
   const { user, loading } = useAuth() as {
     user: AdminUser | null;
     loading: boolean;
@@ -38,11 +30,6 @@ export default function AdminDashboard() {
       router.replace("/");
     }
   }, [user, loading, router]);
-
-  const handleLogout = async () => {
-    await signOut();
-    router.push("/login");
-  };
 
   if (loading) {
     return (

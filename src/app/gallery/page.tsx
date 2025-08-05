@@ -4,6 +4,7 @@ import Navigation from "@/components/ui/Navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePageTransitionContext } from "@/components/Providers";
+import Image from "next/image";
 
 interface Martyr {
   id: number;
@@ -33,7 +34,7 @@ export default function Gallery() {
         setLoading(false);
         setGlobalLoading(false); // Hide global loader
       });
-  }, []);
+  }, [setGlobalLoading]);
 
   const filtered =
     selectedEra === "All"
@@ -97,10 +98,13 @@ export default function Gallery() {
                 >
                   <div className="icon-inner overflow-hidden">
                     <div className="relative">
-                      <img
-                        src={m.iconUrl}
+                      <Image
+                        src={m.iconUrl || "/placeholder-icon.jpg"}
                         alt={m.name}
-                        className="w-full h-140 object-fit transition-transform duration-500 group-hover:scale-110"
+                        width={400}
+                        height={400}
+                        className="w-full h-140 object-cover transition-transform duration-500 group-hover:scale-110"
+                        unoptimized
                       />
                       <div
                         className={`absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent transition-opacity duration-300 ${

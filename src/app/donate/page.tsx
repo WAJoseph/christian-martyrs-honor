@@ -64,7 +64,7 @@ export default function Donate() {
                     {["one-time", "monthly"].map((t) => (
                       <button
                         key={t}
-                        onClick={() => setType(t as any)}
+                        onClick={() => setType(t as "one-time" | "monthly")}
                         className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                           type === t
                             ? "bg-gold-500 text-slate-900"

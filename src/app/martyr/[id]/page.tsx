@@ -1,7 +1,8 @@
 // src/app/martyr/[id]/page.tsx
 
 import Navigation from "@/components/ui/Navigation";
-import dynamic from "next/dynamic";
+
+import Image from "next/image";
 
 interface MartyrDetailProps {
   martyr: {
@@ -30,10 +31,13 @@ function MartyrDetail({ martyr }: MartyrDetailProps) {
             <div className="icon-frame p-6">
               <div className="icon-inner overflow-hidden">
                 {martyr.iconUrl && (
-                  <img
+                  <Image
                     src={martyr.iconUrl}
                     alt={martyr.name}
+                    width={600}
+                    height={600}
                     className="w-full h-[600px] object-cover"
+                    unoptimized
                   />
                 )}
               </div>
@@ -111,13 +115,13 @@ function MartyrDetail({ martyr }: MartyrDetailProps) {
 export default async function MartyrPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  // Server component: fetch data on the server
+  const { id } = await params;
   const res = await fetch(
     `${
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-    }/api/martyrs/${params.id}`,
+    }/api/martyrs/${id}`,
     { cache: "no-store" }
   );
   if (!res.ok) {

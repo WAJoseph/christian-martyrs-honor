@@ -23,7 +23,7 @@ export default function TestimoniesPage() {
           const data = await res.json();
           setTestimonies(data);
         }
-      } catch (err) {
+      } catch {
         // Optionally handle error
       } finally {
         setLoading(false);
