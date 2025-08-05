@@ -6,6 +6,13 @@ import { useState, useEffect } from "react";
 import { usePageTransitionContext } from "@/components/Providers";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabaseClient";
+import { checkContentWithAI } from "../../../lib/contentFilter";
+// Helper to get access token
+const getAccessToken = async () => {
+  const session = (await supabase.auth.getSession()).data.session;
+  return session?.access_token || "";
+};
 
 interface Testimony {
   id: number;
@@ -37,7 +44,11 @@ export default function Community() {
         const res = await fetch("/api/testimonies");
         if (res.ok) {
           const data = await res.json();
-          setTestimonies(data);
+          // Only show approved testimonies, featured first
+          const approved = data.filter((t: any) => t.status === "approved");
+          const featured = approved.filter((t: any) => t.featured);
+          const nonFeatured = approved.filter((t: any) => !t.featured);
+          setTestimonies([...featured, ...nonFeatured]);
         }
       } catch {
         setError("Failed to load testimonies.");
@@ -53,9 +64,26 @@ export default function Community() {
     setSubmitting(true);
     setError("");
     try {
+      // First, check with Flask AI server via utility
+      const aiData = await checkContentWithAI(
+        `${form.name} ${form.title} ${form.content}`
+      );
+      if (!aiData.allowed) {
+        setError(aiData.message || "Testimony contains inappropriate content.");
+        setSubmitting(false);
+        return;
+      }
+      // If allowed, submit to API as normal
+      let headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      const token = await getAccessToken();
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/testimonies", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           name: form.name,
           title: form.title,
@@ -64,8 +92,6 @@ export default function Community() {
         }),
       });
       if (res.ok) {
-        const newTestimony = await res.json();
-        setTestimonies([newTestimony, ...testimonies]);
         setForm({ name: "", title: "", content: "" });
         setShowForm(false);
       } else {

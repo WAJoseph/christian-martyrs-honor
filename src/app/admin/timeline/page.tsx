@@ -2,6 +2,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "../../../../lib/supabaseClient";
+// Helper to get access token
+const getAccessToken = async () => {
+  const session = (await supabase.auth.getSession()).data.session;
+  return session?.access_token || "";
+};
 
 interface TimelineCentury {
   id: number;
@@ -15,11 +21,14 @@ interface TimelineEntry {
   description: string;
   centuryId: number;
   century: { century: string };
+  martyrId?: number;
+  martyr?: { id: number; name: string };
 }
 
 export default function AdminTimelinePage() {
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
   const [centuries, setCenturies] = useState<TimelineCentury[]>([]);
+  const [martyrs, setMartyrs] = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Partial<TimelineEntry>>({});
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -29,17 +38,31 @@ export default function AdminTimelinePage() {
 
   useEffect(() => {
     fetchAll();
+    fetchMartyrs();
   }, []);
 
   async function fetchAll() {
     setLoading(true);
+    const token = await getAccessToken();
     const [entriesRes, centuriesRes] = await Promise.all([
-      fetch("/api/timeline/entry"),
-      fetch("/api/timeline/century"),
+      fetch("/api/timeline/entry", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch("/api/timeline/century", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
     ]);
     setEntries(await entriesRes.json());
     setCenturies(await centuriesRes.json());
     setLoading(false);
+  }
+
+  async function fetchMartyrs() {
+    const res = await fetch("/api/martyrs");
+    if (res.ok) {
+      const data: { id: number; name: string }[] = await res.json();
+      setMartyrs(data.map((m) => ({ id: m.id, name: m.name })));
+    }
   }
 
   function startEdit(entry: TimelineEntry) {
@@ -62,9 +85,13 @@ export default function AdminTimelinePage() {
     const url = editingId
       ? `/api/timeline/entry/${editingId}`
       : "/api/timeline/entry";
+    const token = await getAccessToken();
     await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(form),
     });
     setShowEntryForm(false);
@@ -75,7 +102,11 @@ export default function AdminTimelinePage() {
 
   async function handleDelete(id: number) {
     if (!confirm("Delete this entry?")) return;
-    await fetch(`/api/timeline/entry/${id}`, { method: "DELETE" });
+    const token = await getAccessToken();
+    await fetch(`/api/timeline/entry/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     fetchAll();
   }
 
@@ -87,9 +118,13 @@ export default function AdminTimelinePage() {
   async function handleCenturySubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!centuryForm.century) return;
+    const token = await getAccessToken();
     await fetch("/api/timeline/century", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(centuryForm),
     });
     setShowCenturyForm(false);
@@ -102,7 +137,11 @@ export default function AdminTimelinePage() {
       !confirm("Delete this century? All entries in it will also be deleted.")
     )
       return;
-    await fetch(`/api/timeline/century/${id}`, { method: "DELETE" });
+    const token = await getAccessToken();
+    await fetch(`/api/timeline/century/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     fetchAll();
   }
 
@@ -197,6 +236,30 @@ export default function AdminTimelinePage() {
                     {centuries.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.century}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2 flex flex-col gap-2">
+                  <label className="text-amber-300 font-medium">
+                    Linked Martyr (Gallery)
+                  </label>
+                  <select
+                    className="bg-slate-800 text-amber-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    value={form.martyrId || ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        martyrId: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      }))
+                    }
+                  >
+                    <option value="">None</option>
+                    {martyrs.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
                       </option>
                     ))}
                   </select>
@@ -311,6 +374,9 @@ export default function AdminTimelinePage() {
                           </td>
                           <td className="px-6 py-4 text-sm text-amber-100">
                             {entry.description}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-amber-100">
+                            {entry.martyr ? entry.martyr.name : "-"}
                           </td>
                           <td className="px-6 py-4 text-right space-x-4">
                             <button

@@ -61,22 +61,22 @@ export default function AdminLayout({
       ),
     },
     {
-      id: "donations",
-      label: "Offerings",
-      href: "/admin/donations",
-      icon: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
-        </svg>
-      ),
-    },
-    {
       id: "timeline",
       label: "Timeline",
       href: "/admin/timeline",
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M10 2a1 1 0 011 1v1.07A7.002 7.002 0 0117.93 9H19a1 1 0 110 2h-1.07A7.002 7.002 0 0111 17.93V19a1 1 0 11-2 0v-1.07A7.002 7.002 0 012.07 11H1a1 1 0 110-2h1.07A7.002 7.002 0 019 2.07V1a1 1 0 012 0v1.07zM10 4a6 6 0 100 12A6 6 0 0010 4z" />
+        </svg>
+      ),
+    },
+    {
+      id: "donations",
+      label: "Offerings",
+      href: "/admin/donations",
+      icon: (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
         </svg>
       ),
     },

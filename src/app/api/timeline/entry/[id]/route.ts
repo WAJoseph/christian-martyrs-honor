@@ -15,10 +15,8 @@ export async function GET(
   return NextResponse.json(entry);
 }
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: Request, context: any) {
+  const { params } = await context;
   const { getUserFromRequest, isAdmin } = await import(
     "../../../../../../lib/supabaseAdmin"
   );
@@ -30,19 +28,26 @@ export async function PUT(
   const data = await req.json();
   // Basic input validation
   const name = (data.name || "").toString().trim().slice(0, 128);
-  const year = Number(data.year);
+  const year = (data.year || "").toString().trim().slice(0, 16);
   const description = (data.description || "").toString().trim().slice(0, 2000);
   const centuryId = Number(data.centuryId);
-  if (!name || isNaN(year) || !description || isNaN(centuryId)) {
+  const martyrId =
+    data.martyrId !== undefined &&
+    data.martyrId !== null &&
+    data.martyrId !== ""
+      ? Number(data.martyrId)
+      : null;
+  if (!name || !year || !description || isNaN(centuryId)) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const entry = await prisma.timelineEntry.update({
     where: { id },
     data: {
       name,
-      year: Number(year),
+      year,
       description,
       centuryId,
+      martyrId,
     },
   });
   return NextResponse.json(entry);

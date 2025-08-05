@@ -2,6 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
+// Helper to get access token
+const getAccessToken = async () => {
+  const session = (await supabase.auth.getSession()).data.session;
+  return session?.access_token || "";
+};
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { signOut } from "../../../lib/supabaseClient";

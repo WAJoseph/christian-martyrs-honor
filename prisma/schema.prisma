@@ -38,6 +38,7 @@ model Martyr {
   story       String   @db.Text @default("")
   iconDescription String @db.Text @default("")
   intercessoryPrayer String @db.Text @default("")
+  timelineEntries TimelineEntry[]
 
   @@schema("public")
 }
@@ -66,6 +67,8 @@ model TimelineEntry {
   description String
   century     TimelineCentury   @relation(fields: [centuryId], references: [id])
   centuryId   Int
+  martyr      Martyr?           @relation(fields: [martyrId], references: [id])
+  martyrId    Int?
 
   @@schema("public")
 }
@@ -77,6 +80,7 @@ model Testimony {
   content String    @db.Text
   date    DateTime
   status  String    @default("pending") // "pending", "approved", "rejected"
+  featured Boolean  @default(false)
 
   @@schema("public")
 }

@@ -2,6 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "../../../../lib/supabaseClient";
+// Helper to get access token
+const getAccessToken = async () => {
+  const session = (await supabase.auth.getSession()).data.session;
+  return session?.access_token || "";
+};
 import { Era } from "../../../../generated/prisma";
 
 interface Martyr {
@@ -62,9 +68,13 @@ export default function MartyrsPage() {
       : "/api/martyrs";
     const method = editingMartyr ? "PUT" : "POST";
     try {
+      const token = await getAccessToken();
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(formData),
       });
       if (res.ok) {
@@ -96,7 +106,13 @@ export default function MartyrsPage() {
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this martyr?")) {
-      await fetch(`/api/martyrs/${id}`, { method: "DELETE" });
+      const token = await getAccessToken();
+      await fetch(`/api/martyrs/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       fetchMartyrs();
     }
   };

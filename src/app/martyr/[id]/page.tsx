@@ -1,6 +1,7 @@
 // src/app/martyr/[id]/page.tsx
 
 import Navigation from "@/components/ui/Navigation";
+import dynamic from "next/dynamic";
 
 interface MartyrDetailProps {
   martyr: {
@@ -15,6 +16,8 @@ interface MartyrDetailProps {
     feastDay?: string;
   };
 }
+
+import ActionButtons from "../_components/ActionButtons";
 
 function MartyrDetail({ martyr }: MartyrDetailProps) {
   return (
@@ -97,22 +100,7 @@ function MartyrDetail({ martyr }: MartyrDetailProps) {
               </div>
             </div>
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="icon-frame px-6 py-3 flex-1 transition-all duration-300 hover:scale-105">
-                <div className="icon-inner px-4 py-2">
-                  <span className="font-liturgical text-lg gold-text font-medium">
-                    Read More Saints
-                  </span>
-                </div>
-              </button>
-              <button className="icon-frame px-6 py-3 flex-1 transition-all duration-300 hover:scale-105">
-                <div className="icon-inner px-4 py-2">
-                  <span className="font-liturgical text-lg gold-text font-medium">
-                    Share Story
-                  </span>
-                </div>
-              </button>
-            </div>
+            <ActionButtons martyrName={martyr.name} />
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
-import { getUserFromRequest, isAdmin } from "../../../../lib/supabaseAdmin";
+import { getUserFromRequest, isAdmin } from "../../../../../lib/supabaseAdmin";
 
 export async function PUT(
   request: NextRequest,
@@ -15,11 +15,12 @@ export async function PUT(
     const { params } = await Promise.resolve(context);
     const id = parseInt(params.id);
     const body = await request.json();
-    let { name, title, content, date, status } = body;
+    let { name, title, content, date, status, featured } = body;
     name = (name || "").toString().trim().slice(0, 64);
     title = (title || "").toString().trim().slice(0, 128);
     content = (content || "").toString().trim().slice(0, 2000);
     status = (status || "pending").toString().trim();
+    featured = typeof featured === "boolean" ? featured : false;
     if (!name || !title || !content) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -34,6 +35,7 @@ export async function PUT(
         content,
         date: new Date(date),
         status,
+        featured,
       },
     });
     return NextResponse.json(testimony);

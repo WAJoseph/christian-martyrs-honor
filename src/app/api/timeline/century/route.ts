@@ -19,13 +19,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const data = await req.json();
-  const century = Number(data.century);
-  if (isNaN(century)) {
+  const century = (data.century || "").toString().trim().slice(0, 32);
+  if (!century) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const result = await prisma.timelineCentury.create({
     data: {
-      century: Number(century),
+      century,
     },
   });
   return NextResponse.json(result);

@@ -19,11 +19,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   // Authenticate admin
-  const { getUserFromRequest, isAdmin } = await import(
-    "../../../../lib/supabaseAdmin"
-  );
+  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
   const user = await getUserFromRequest(request);
-  if (!user || !isAdmin(user)) {
+  // Debug log for admin detection
+  console.log("API user:", user);
+  const isAdmin =
+    user && (user.role === "admin" || user.app_metadata?.role === "admin");
+  if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
@@ -74,11 +76,13 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   // Authenticate admin
-  const { getUserFromRequest, isAdmin } = await import(
-    "../../../../lib/supabaseAdmin"
-  );
+  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
   const user = await getUserFromRequest(request);
-  if (!user || !isAdmin(user)) {
+  // Debug log for admin detection
+  console.log("API user:", user);
+  const isAdmin =
+    user && (user.role === "admin" || user.app_metadata?.role === "admin");
+  if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
@@ -130,11 +134,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   // Authenticate admin
-  const { getUserFromRequest, isAdmin } = await import(
-    "../../../../lib/supabaseAdmin"
-  );
+  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
   const user = await getUserFromRequest(request);
-  if (!user || !isAdmin(user)) {
+  // Debug log for admin detection
+  console.log("API user:", user);
+  const isAdmin =
+    user && (user.role === "admin" || user.app_metadata?.role === "admin");
+  if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {

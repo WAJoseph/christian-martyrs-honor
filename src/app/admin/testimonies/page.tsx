@@ -2,6 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "../../../../lib/supabaseClient";
+// Helper to get access token
+const getAccessToken = async () => {
+  const session = (await supabase.auth.getSession()).data.session;
+  return session?.access_token || "";
+};
 import Link from "next/link";
 import { useAuth } from "../../../../context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -29,6 +35,7 @@ interface Testimony {
 }
 
 export default function TestimoniesPage() {
+  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
   const [testimonies, setTestimonies] = useState<Testimony[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
@@ -58,7 +65,12 @@ export default function TestimoniesPage() {
     const fetchTestimonies = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/testimonies?all=1");
+        const token = await getAccessToken();
+        const res = await fetch("/api/testimonies?all=1", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.ok) {
           const data = await res.json();
           setTestimonies(data);
@@ -78,9 +90,13 @@ export default function TestimoniesPage() {
     try {
       const testimony = testimonies.find((t) => t.id === id);
       if (!testimony) return;
+      const token = await getAccessToken();
       const res = await fetch(`/api/testimonies/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ ...testimony, status: newStatus }),
       });
       if (res.ok) {
@@ -91,14 +107,47 @@ export default function TestimoniesPage() {
     } catch {}
   };
 
-  const handleFeatureToggle = (id: string) => {
-    setTestimonies((prev) =>
-      prev.map((testimony) =>
-        testimony.id === id
-          ? { ...testimony, featured: !testimony.featured }
-          : testimony
-      )
-    );
+  // Delete testimony
+  const handleDeleteTestimony = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this testimony?")) return;
+    const token = await getAccessToken();
+    const res = await fetch(`/api/testimonies/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.ok) {
+      setTestimonies((prev) => prev.filter((t) => t.id !== id));
+    }
+  };
+
+  const handleFeatureToggle = (id: number) => {
+    (async () => {
+      const token = await getAccessToken();
+      const testimony = testimonies.find((t) => t.id === id);
+      if (!testimony) return;
+      const res = await fetch(`/api/testimonies/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: testimony.name,
+          title: testimony.title,
+          content: testimony.content || testimony.testimony || "",
+          date:
+            testimony.date || testimony.created_at || new Date().toISOString(),
+          status: testimony.status,
+          featured: !testimony.featured,
+        }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setTestimonies((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      }
+    })();
   };
 
   const filteredTestimonies = testimonies.filter((testimony) => {
@@ -106,8 +155,12 @@ export default function TestimoniesPage() {
       testimony.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       testimony.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       testimony.testimony?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTab = activeTab === "all" || testimony.status === activeTab;
-    return matchesSearch && matchesTab;
+    let matchesTab = false;
+    if (activeTab === "all") matchesTab = true;
+    else if (activeTab === "featured") matchesTab = !!testimony.featured;
+    else matchesTab = testimony.status === activeTab;
+    const matchesFeatured = !showFeaturedOnly || testimony.featured;
+    return matchesSearch && matchesTab && matchesFeatured;
   });
 
   if (authLoading || loading) {
@@ -316,19 +369,21 @@ export default function TestimoniesPage() {
             </div>
 
             <div className="flex space-x-2">
-              {["all", "approved", "pending", "rejected"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-3 rounded-2xl font-medium transition-all duration-300 capitalize ${
-                    activeTab === tab
-                      ? "bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100 shadow-lg shadow-amber-500/25"
-                      : "bg-slate-800/50 text-amber-300 hover:bg-amber-600/20"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {["all", "approved", "pending", "rejected", "featured"].map(
+                (tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-3 rounded-2xl font-medium transition-all duration-300 capitalize ${
+                      activeTab === tab
+                        ? "bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100 shadow-lg shadow-amber-500/25"
+                        : "bg-slate-800/50 text-amber-300 hover:bg-amber-600/20"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -402,12 +457,21 @@ export default function TestimoniesPage() {
                   >
                     View Details
                   </button>
+                  <button
+                    onClick={() => handleDeleteTestimony(testimony.id)}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-red-100 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                  >
+                    Delete
+                  </button>
 
                   {testimony.status === "pending" && (
                     <div className="flex space-x-2">
                       <button
                         onClick={() =>
-                          handleStatusChange(testimony.id, "approved")
+                          handleStatusChange(
+                            testimony.id.toString(),
+                            "approved"
+                          )
                         }
                         className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-green-100 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300"
                       >
@@ -415,7 +479,10 @@ export default function TestimoniesPage() {
                       </button>
                       <button
                         onClick={() =>
-                          handleStatusChange(testimony.id, "rejected")
+                          handleStatusChange(
+                            testimony.id.toString(),
+                            "rejected"
+                          )
                         }
                         className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-red-100 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300"
                       >
