@@ -36,7 +36,7 @@ function MartyrDetail({ martyr }: MartyrDetailProps) {
                     alt={martyr.name}
                     width={600}
                     height={600}
-                    className="w-full h-[600px] object-cover"
+                    className="w-full h-[600px] object-fill"
                     unoptimized
                   />
                 )}
