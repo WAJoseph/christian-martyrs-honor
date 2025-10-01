@@ -1,7 +1,7 @@
 // src/app/admin/page.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,14 @@ export default function AdminDashboard() {
   };
   const router = useRouter();
 
+  // State for dashboard counts (must be before any early return)
+  const [martyrsCount, setMartyrsCount] = useState<number | null>(null);
+  const [testimoniesCount, setTestimoniesCount] = useState<number | null>(null);
+  const [timelineEntriesCount, setTimelineEntriesCount] = useState<
+    number | null
+  >(null);
+  const donationsCount = 0; // No backend, so always 0
+
   useEffect(() => {
     if (
       !loading &&
@@ -30,6 +38,28 @@ export default function AdminDashboard() {
       router.replace("/");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    // Fetch martyrs count
+    fetch("/api/martyrs")
+      .then((res) => res.json())
+      .then((data) => setMartyrsCount(Array.isArray(data) ? data.length : 0))
+      .catch(() => setMartyrsCount(0));
+    // Fetch testimonies count
+    fetch("/api/testimonies")
+      .then((res) => res.json())
+      .then((data) =>
+        setTestimoniesCount(Array.isArray(data) ? data.length : 0)
+      )
+      .catch(() => setTestimoniesCount(0));
+    // Fetch timeline entries count
+    fetch("/api/timeline/entry")
+      .then((res) => res.json())
+      .then((data) =>
+        setTimelineEntriesCount(Array.isArray(data) ? data.length : 0)
+      )
+      .catch(() => setTimelineEntriesCount(0));
+  }, []);
 
   if (loading) {
     return (
@@ -106,7 +136,7 @@ export default function AdminDashboard() {
                   Holy Martyrs
                 </p>
                 <p className="text-3xl font-bold text-amber-300 font-liturgical">
-                  -
+                  {martyrsCount === null ? "-" : martyrsCount}
                 </p>
                 <p className="text-xs text-amber-300/60 mt-1">
                   Saints of Faith
@@ -147,7 +177,7 @@ export default function AdminDashboard() {
                   Divine Testimonies
                 </p>
                 <p className="text-3xl font-bold text-amber-300 font-liturgical">
-                  -
+                  {testimoniesCount === null ? "-" : testimoniesCount}
                 </p>
                 <p className="text-xs text-amber-300/60 mt-1">
                   Voices of Faith
@@ -184,7 +214,11 @@ export default function AdminDashboard() {
                   Sacred Offerings
                 </p>
                 <p className="text-3xl font-bold text-amber-300 font-liturgical">
-                  -
+                  {new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    minimumFractionDigits: 2,
+                  }).format(donationsCount)}
                 </p>
                 <p className="text-xs text-amber-300/60 mt-1">Gifts of Love</p>
               </div>
@@ -223,7 +257,7 @@ export default function AdminDashboard() {
                   Chronicle Entries
                 </p>
                 <p className="text-3xl font-bold text-amber-300 font-liturgical">
-                  -
+                  {timelineEntriesCount === null ? "-" : timelineEntriesCount}
                 </p>
                 <p className="text-xs text-amber-300/60 mt-1">
                   Sacred Timeline

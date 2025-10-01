@@ -24,6 +24,7 @@ export default function Gallery() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [martyrs, setMartyrs] = useState<Martyr[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const { setLoading: setGlobalLoading } = usePageTransitionContext();
 
   useEffect(() => {
@@ -36,10 +37,24 @@ export default function Gallery() {
       });
   }, [setGlobalLoading]);
 
-  const filtered =
-    selectedEra === "All"
-      ? martyrs
-      : martyrs.filter((m) => m.era === selectedEra);
+  // Pagination logic
+  const itemsPerPage = 3;
+  const filtered = martyrs.filter((m) => {
+    const matchesEra = selectedEra === "All" || m.era === selectedEra;
+    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase());
+    return matchesEra && matchesSearch;
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+  const paginated = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 when filter/search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedEra, search]);
 
   return (
     <div className="min-h-screen pt-30 pb-12 px-6">
@@ -55,8 +70,15 @@ export default function Gallery() {
             for Christ
           </p>
         </div>
-        {/* Filter */}
+        {/* Search Bar & Filter */}
         <div className="scroll-panel p-4 mb-8 max-w-2xl mx-auto">
+          <input
+            type="text"
+            placeholder="Search martyrs by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full mb-4 px-4 py-2 rounded-lg border border-gold-500 bg-slate-800 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 focus:bg-slate-800 transition"
+          />
           <div className="flex flex-wrap justify-center gap-3">
             {eras.map((era) => (
               <button
@@ -88,7 +110,7 @@ export default function Gallery() {
                   </div>
                 </div>
               ))
-            : filtered.map((m) => (
+            : paginated.map((m) => (
                 <Link
                   key={m.id}
                   href={`/martyr/${m.id}`}
@@ -129,6 +151,39 @@ export default function Gallery() {
                 </Link>
               ))}
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-lg font-medium border border-gold-500 bg-slate-800 text-gold-300 transition disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-lg font-medium border border-gold-500 transition ${
+                  currentPage === i + 1
+                    ? "bg-gold-500 text-slate-900"
+                    : "bg-slate-800 text-gold-300 hover:bg-gold-700"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-lg font-medium border border-gold-500 bg-slate-800 text-gold-300 transition disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Next
+            </button>
+          </div>
+        )}
         {/* CTA */}
         <div className="text-center mt-12">
           <button
