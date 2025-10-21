@@ -5,7 +5,11 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 
-export default function SacredSignOutButton() {
+type Props = {
+  inline?: boolean; // render a compact, non-fixed inline version for mobile menus
+};
+
+export default function SacredSignOutButton({ inline = false }: Props) {
   const [hovered, setHovered] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
@@ -29,9 +33,77 @@ export default function SacredSignOutButton() {
     }, 2000);
   };
 
+  // If rendering inline (for mobile menu), don't use fixed positioning or extra tooltips
+  if (inline) {
+    return (
+      <div
+        className="flex items-center space-x-3 w-full"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <button
+          aria-label="Sign out"
+          className={`relative flex items-center w-full justify-center space-x-2 px-3 py-2 rounded-md transition-all duration-300 focus:outline-none bg-slate-800/40 hover:bg-slate-800/60 ${
+            hovered ? "scale-105" : ""
+          } ${signingOut ? "opacity-80" : ""}`}
+          onClick={handleSignOut}
+          disabled={signingOut}
+        >
+          <div className="icon-inner p-1 flex items-center justify-center relative overflow-hidden">
+            {signingOut && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute w-10 h-10 rounded-full bg-gold/20 animate-ping" />
+                <div className="absolute w-6 h-6 rounded-full bg-gold/30 animate-pulse" />
+              </div>
+            )}
+
+            <div
+              className={`relative w-5 h-5 transition-all duration-300 ${
+                hovered || signingOut
+                  ? "opacity-0 scale-0"
+                  : "opacity-100 scale-100"
+              }`}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 32 32"
+                className="gold-text"
+              >
+                <rect x="14" y="2" width="4" height="28" fill="currentColor" />
+                <rect x="10" y="4" width="12" height="3" fill="currentColor" />
+                <rect x="6" y="10" width="20" height="4" fill="currentColor" />
+                <rect
+                  x="8"
+                  y="22"
+                  width="16"
+                  height="3"
+                  fill="currentColor"
+                  transform="rotate(-15 16 23.5)"
+                />
+              </svg>
+            </div>
+
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
+                hovered && !signingOut
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-0"
+              }`}
+            >
+              <LogOut size={16} className="gold-text" />
+            </div>
+          </div>
+          <span className="text-sm font-medium gold-text">Sign out</span>
+        </button>
+      </div>
+    );
+  }
+
+  // Default (non-inline) rendering: fixed on the top-right. Hidden on small screens so a mobile menu can render an inline variant instead.
   return (
     <div
-      className="fixed top-6 right-6 z-50 flex flex-col items-center"
+      className="hidden sm:flex fixed top-6 right-6 z-50 flex-col items-center"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
