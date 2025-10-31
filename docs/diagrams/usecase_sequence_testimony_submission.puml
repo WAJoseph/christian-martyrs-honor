@@ -1,0 +1,33 @@
+@startuml
+title Use Case Realization - Submit Testimony (sequence)
+actor User
+participant Browser
+participant "TestimonyForm (UI)" as UI
+participant "/api/testimonies (Next API)" as API
+participant "TestimonyService (Domain)" as Service
+participant "AI Moderation Microservice" as AI
+participant "Supabase Adapter" as DB
+
+User -> Browser : open form
+Browser -> UI : fill & submit
+UI -> API : POST /api/testimonies { payload }
+API -> Service : validate & transform
+Service -> AI : POST /moderate { text }
+AI --> Service : { result: allow|block, score }
+alt allowed
+  Service -> DB : encryptPII() & insert(testimony)
+  DB --> Service : inserted record id
+  Service --> API : 201 Created + id
+  API --> UI : success
+else blocked
+  Service --> API : 422 ModerationFailed
+  API --> UI : show moderation error
+end
+
+note over Service,DB
+  Ports & Adapters:
+  - API is primary adapter
+  - DB is a secondary adapter implementing repository port
+end note
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+title Deployment Diagram - Christian Martyrs Honor
+
+node Browser
+node CDN
+
+node "Next.js App Server" as NextServer {
+  component "App Router"
+  component "API Routes"
+}
+
+node "AI Moderation Service" as AIService
+node "Supabase (Postgres)" as DB
+node "Object Storage (e.g., Supabase Storage / S3)" as Storage
+node "Monitoring/CI" as Monitoring
+
+Browser --> CDN : static assets
+Browser --> NextServer : HTTPS
+NextServer --> DB : SQL via Prisma/Supabase
+NextServer --> AIService : HTTPS REST / gRPC
+NextServer --> Storage : upload images
+Monitoring --> NextServer : health checks
+
+note left of AIService
+  - Containerized microservice
+  - Exposes /moderate endpoint
+  - Scales independently
+end note
+
+@enduml

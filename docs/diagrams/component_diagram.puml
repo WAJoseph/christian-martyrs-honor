@@ -1,0 +1,33 @@
+@startuml
+title Component Diagram - Christian Martyrs Honor
+
+package "Web App (Next.js)" {
+  component Page
+  component Navigation
+  component TestimonyForm
+  component Providers
+  component AuthContext
+  component APIHandlers
+}
+
+component SupabaseClient
+component Prisma
+component AIService
+component CDN
+
+Page --> Navigation
+Page --> TestimonyForm
+Page --> Providers
+Providers --> AuthContext
+TestimonyForm --> APIHandlers : POST /api/testimonies
+APIHandlers --> SupabaseClient : persist/query
+APIHandlers --> AIService : /moderate
+SupabaseClient --> Prisma
+
+note right
+  Key components highlighted for microservice integration:
+  - APIHandlers: adaptor that talks to AIService and Supabase
+  - AIService: separate microservice (container)
+end note
+
+@enduml

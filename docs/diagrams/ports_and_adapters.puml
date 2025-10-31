@@ -1,0 +1,36 @@
+@startuml
+title Ports & Adapters (Hexagonal) - Christian Martyrs Honor
+
+package "Primary Adapters (Inbound)" {
+  actor Browser
+  Browser --> WebUI : HTTP/HTTPS (REST)
+}
+
+package "Application (Core)" {
+  rectangle "Next.js App (App Router)" as NextApp
+  rectangle "Domain Services\n(TestimonyService, AuthService)" as Domain
+  rectangle "Repository Port" as RepoPort
+  NextApp --> Domain : invoke use-cases
+  Domain --> RepoPort : repository interface
+}
+
+package "Secondary Adapters (Outbound)" {
+  rectangle "Supabase Adapter (Repository)\n(Prisma/pg)" as SupabaseAdapter
+  rectangle "AI Moderation Microservice (REST)" as AIMod
+  RepoPort --> SupabaseAdapter : persist/retrieve
+  Domain --> AIMod : POST /moderate (JSON)
+}
+
+note left of NextApp
+  Ports:
+  - REST endpoints (/api/testimonies, /api/martyrs,...)
+  - Auth context (client)
+end note
+
+note right of SupabaseAdapter
+  Adapter implements repository port
+  - encrypts PII before persist
+  - maintains audit logs
+end note
+
+@enduml
