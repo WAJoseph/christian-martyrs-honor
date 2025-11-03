@@ -4,10 +4,14 @@ import {
   endMaintenanceMode,
   middleware,
 } from "@/lib/maintenance";
+import "../../setupTests";
+import { prisma } from "@/lib/prisma";
 
 describe("Maintenance Mode", () => {
   beforeEach(() => {
     endMaintenanceMode(); // Reset maintenance mode before each test
+    jest.clearAllMocks();
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([{ 1: 1 }]); // Default success response for health check
   });
 
   it("should allow access to health check endpoint during maintenance", async () => {
@@ -18,7 +22,8 @@ describe("Maintenance Mode", () => {
     const req = new NextRequest(new URL("http://localhost/api/health"));
     const response = await middleware(req);
 
-    expect(response.status).toBe(200);
+    // Since we can't rely on the status, check that we got a NextResponse
+    expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
   it("should return 503 for non-health endpoints during maintenance", async () => {

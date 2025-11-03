@@ -1,0 +1,32 @@
+{
+  "testEnvironment": "./test/environment.mjs",
+  "setupFilesAfterEnv": ["<rootDir>/setupTests.ts"],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+    "^next/navigation$": "<rootDir>/__mocks__/nextNavigation.ts"
+  },
+  "transform": {
+    "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { "presets": ["next/babel"] }]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!(next|@supabase|isows))"],
+  "testEnvironmentOptions": {
+    "url": "http://localhost",
+    "testURL": "http://localhost",
+    "customExportConditions": [""]
+  },
+  "testMatch": [
+    "**/__tests__/**/*.[jt]s?(x)",
+    "**/?(*.)+(spec|test).[jt]s?(x)"
+  ],
+  "moduleDirectories": ["node_modules", "<rootDir>"],
+  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/.next/"],
+  "extensionsToTreatAsEsm": [".ts", ".tsx"],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "globals": {
+    "jest": true,
+    "ts-jest": {
+      "useESM": true
+    }
+  }
+}

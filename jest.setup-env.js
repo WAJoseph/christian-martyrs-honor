@@ -1,0 +1,9 @@
+module.exports = {
+  process: {
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "your-anon-key",
+      SUPABASE_SERVICE_ROLE_KEY: "your-service-role-key",
+    },
+  },
+};

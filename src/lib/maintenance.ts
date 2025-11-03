@@ -33,18 +33,17 @@ export function middleware(request: NextRequest) {
   }
 
   if (isInMaintenance) {
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         error: "System is under maintenance",
         maintenanceWindow: {
           start: maintenanceStartTime,
           end: maintenanceEndTime,
         },
-      }),
+      },
       {
         status: 503,
         headers: {
-          "Content-Type": "application/json",
           // Add Retry-After header if maintenance end time is available
           ...(maintenanceEndTime && {
             "Retry-After": Math.ceil(

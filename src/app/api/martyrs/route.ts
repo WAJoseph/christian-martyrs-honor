@@ -18,16 +18,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  // Authenticate admin
-  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
-  const user = await getUserFromRequest(request);
-  // Debug log for admin detection
-  console.log("API user:", user);
-  const isAdmin =
-    user && (user.role === "admin" || user.app_metadata?.role === "admin");
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Authenticate admin via centralized RBAC helper
+  const { requireAdmin } = await import("../../../lib/rbac");
+  const unauthorizedResponse = await requireAdmin(request);
+  if (unauthorizedResponse) return unauthorizedResponse;
   try {
     const body = await request.json();
     const {
@@ -75,16 +69,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Authenticate admin
-  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
-  const user = await getUserFromRequest(request);
-  // Debug log for admin detection
-  console.log("API user:", user);
-  const isAdmin =
-    user && (user.role === "admin" || user.app_metadata?.role === "admin");
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { requireAdmin } = await import("../../../lib/rbac");
+  const unauthorizedResponse = await requireAdmin(request);
+  if (unauthorizedResponse) return unauthorizedResponse;
   try {
     const { id } = await params;
     const idNum = parseInt(id);
@@ -134,16 +121,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Authenticate admin
-  const { getUserFromRequest } = await import("../../../../lib/supabaseAdmin");
-  const user = await getUserFromRequest(request);
-  // Debug log for admin detection
-  console.log("API user:", user);
-  const isAdmin =
-    user && (user.role === "admin" || user.app_metadata?.role === "admin");
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const { requireAdmin } = await import("../../../lib/rbac");
+  const unauthorizedResponse = await requireAdmin(request);
+  if (unauthorizedResponse) return unauthorizedResponse;
   try {
     const { id } = await params;
     const idNum = parseInt(id);
