@@ -1,0 +1,75 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - alert [ref=e2]
+  - button "Open Next.js Dev Tools" [ref=e8] [cursor=pointer]:
+    - img [ref=e9]
+  - generic [ref=e14]:
+    - navigation [ref=e15]:
+      - generic [ref=e18]:
+        - link "Home" [ref=e19] [cursor=pointer]:
+          - /url: /
+          - img [ref=e21]
+          - generic [ref=e24]: Home
+        - link "Gallery" [ref=e25] [cursor=pointer]:
+          - /url: /gallery
+          - img [ref=e27]
+          - generic [ref=e31]: Gallery
+        - link "Timeline" [ref=e32] [cursor=pointer]:
+          - /url: /timeline
+          - img [ref=e34]
+          - generic [ref=e37]: Timeline
+        - link "Community" [ref=e38] [cursor=pointer]:
+          - /url: /community
+          - img [ref=e40]
+          - generic [ref=e45]: Community
+        - link "Donate" [ref=e46] [cursor=pointer]:
+          - /url: /donate
+          - img [ref=e48]
+          - generic [ref=e50]: Donate
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - heading "Gallery of Holy Martyrs" [level=1] [ref=e53]
+        - paragraph [ref=e54]: Discover the sacred icons and stories of those who gave their lives for Christ
+      - generic [ref=e55]:
+        - textbox "Search martyrs by name..." [ref=e56]
+        - generic [ref=e57]:
+          - button "All" [ref=e58]
+          - button "Apostolic" [ref=e59]
+          - button "Patristic" [ref=e60]
+          - button "Medieval" [ref=e61]
+          - button "Modern" [ref=e62]
+      - generic [ref=e63]:
+        - link "St. Agnes St. Agnes Patristic Era" [ref=e64] [cursor=pointer]:
+          - /url: /martyr/6
+          - generic [ref=e66]:
+            - img "St. Agnes" [ref=e67]
+            - generic [ref=e69]:
+              - heading "St. Agnes" [level=3] [ref=e70]
+              - paragraph [ref=e71]: Patristic Era
+        - link "St. Ignatius St. Ignatius Apostolic Era" [ref=e72] [cursor=pointer]:
+          - /url: /martyr/2
+          - generic [ref=e74]:
+            - img "St. Ignatius" [ref=e75]
+            - generic [ref=e77]:
+              - heading "St. Ignatius" [level=3] [ref=e78]
+              - paragraph [ref=e79]: Apostolic Era
+        - link "St. Lawrence St. Lawrence Patristic Era" [ref=e80] [cursor=pointer]:
+          - /url: /martyr/5
+          - generic [ref=e82]:
+            - img "St. Lawrence" [ref=e83]
+            - generic [ref=e85]:
+              - heading "St. Lawrence" [level=3] [ref=e86]
+              - paragraph [ref=e87]: Patristic Era
+      - generic [ref=e88]:
+        - button "Previous" [disabled] [ref=e89]
+        - button "1" [ref=e90]
+        - button "2" [ref=e91]
+        - button "Next" [ref=e92]
+      - button "Explore More Stories in the Timeline" [ref=e94]:
+        - generic [ref=e95]: Explore More Stories in the Timeline
+```
