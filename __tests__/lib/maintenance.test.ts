@@ -7,6 +7,12 @@ import {
 import "../../setupTests";
 import { prisma } from "@/lib/prisma";
 
+jest.mock("@/lib/prisma", () => ({
+  prisma: {
+    $queryRaw: jest.fn(),
+  },
+}));
+
 describe("Maintenance Mode", () => {
   beforeEach(() => {
     endMaintenanceMode(); // Reset maintenance mode before each test

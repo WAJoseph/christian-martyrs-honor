@@ -1,6 +1,7 @@
 // src/app/api/martyrs/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
+import { safeJson } from "@/lib/serialize";
 
 export async function GET() {
   try {
@@ -54,7 +55,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(martyr, { status: 201 });
+    console.log("Created martyr raw:", martyr);
+    console.log("Type of martyr:", typeof martyr);
+
+    return NextResponse.json(safeJson(martyr), { status: 201 });
   } catch (error) {
     console.error("Error creating martyr:", error);
     return NextResponse.json(
@@ -107,7 +111,10 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(martyr);
+    console.log("Created martyr raw:", martyr);
+    console.log("Type of martyr:", typeof martyr);
+
+    return NextResponse.json(safeJson(martyr));
   } catch (error) {
     console.error("Error updating martyr:", error);
     return NextResponse.json(

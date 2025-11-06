@@ -1,19 +1,19 @@
-import { createTestRequest } from "./testRequest";
+import { createTestRequest } from "../../test/testRequest";
 
 describe("createTestRequest", () => {
   it("creates a request with default GET method", () => {
-    const request = createTestRequest({});
+    const request = createTestRequest({url: "http://localhost/api/test"});
     expect(request.method).toBe("GET");
   });
 
   it("creates a request with specified method", () => {
-    const request = createTestRequest({ method: "POST" });
+    const request = createTestRequest({ method: "POST", url: "http://localhost/api/test" });
     expect(request.method).toBe("POST");
   });
 
   it("includes request body when provided", async () => {
     const testBody = { test: "data" };
-    const request = createTestRequest({
+    const request = createTestRequest({ url: "http://localhost/api/test",
       method: "POST",
       body: testBody,
     });
@@ -23,7 +23,7 @@ describe("createTestRequest", () => {
   });
 
   it("includes custom headers when provided", () => {
-    const request = createTestRequest({
+    const request = createTestRequest({url: "http://localhost/api/test",
       headers: { "X-Test": "test-value" },
     });
 

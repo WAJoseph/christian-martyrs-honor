@@ -1,8 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import Navigation from "@/components/ui/Navigation";
 
 // NOTE: Supabase mock is now handled in jest.setup.js globally
+
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    back: jest.fn(),
+  }),
+}));
 
 describe("Navigation", () => {
   beforeEach(() => {

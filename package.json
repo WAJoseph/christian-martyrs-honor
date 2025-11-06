@@ -9,7 +9,7 @@
     "lint": "next lint",
     "supabase:start": "cd ../christian-martyrs-honor-supabase/supabase-master && pnpm exec supabase start",
     "supabase:stop": "cd ../christian-martyrs-honor-supabase/supabase-master && pnpm exec supabase stop",
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns=playwright-tests",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
     "test:perf": "k6 run tests/k6/**/*.js",

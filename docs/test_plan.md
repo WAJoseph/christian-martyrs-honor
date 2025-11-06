@@ -1,6 +1,6 @@
 # Test Plan and NFR Verification
 
-This document maps each Non-Functional Requirement (NFR) / NDR to concrete test cases, recommended tools, and acceptance criteria. It also lists example test snippets and how to run them.
+This document maps each Non-Functional Requirement NFR to concrete test cases, recommended tools, and acceptance criteria. It also lists example test snippets and how to run them.
 
 ## Overview
 
