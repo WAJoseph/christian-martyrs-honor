@@ -17,7 +17,7 @@ node "Monitoring/CI" as Monitoring
 Browser --> CDN : static assets
 Browser --> NextServer : HTTPS
 NextServer --> DB : SQL via Prisma/Supabase
-NextServer --> AIService : HTTPS REST / gRPC
+NextServer --> AIService : HTTPS REST
 NextServer --> Storage : upload images
 Monitoring --> NextServer : health checks
 

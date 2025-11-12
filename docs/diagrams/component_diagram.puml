@@ -7,7 +7,7 @@ package "Web App (Next.js)" {
   component TestimonyForm
   component Providers
   component AuthContext
-  component APIHandlers
+  component APIsLayer
 }
 
 component SupabaseClient
@@ -19,14 +19,14 @@ Page --> Navigation
 Page --> TestimonyForm
 Page --> Providers
 Providers --> AuthContext
-TestimonyForm --> APIHandlers : POST /api/testimonies
-APIHandlers --> SupabaseClient : persist/query
-APIHandlers --> AIService : /moderate
+TestimonyForm --> APIsLayer : POST /api/testimonies
+APIsLayer --> SupabaseClient : persist/query
+APIsLayer --> AIService : /moderate
 SupabaseClient --> Prisma
 
 note right
   Key components highlighted for microservice integration:
-  - APIHandlers: adaptor that talks to AIService and Supabase
+  - APIsLayer: adaptor that talks to AIService and Supabase
   - AIService: separate microservice (container)
 end note
 

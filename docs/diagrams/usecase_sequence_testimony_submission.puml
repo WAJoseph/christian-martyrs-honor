@@ -12,10 +12,10 @@ User -> Browser : open form
 Browser -> UI : fill & submit
 UI -> API : POST /api/testimonies { payload }
 API -> Service : validate & transform
-Service -> AI : POST /moderate { text }
+Service -> AI : POST /classify { text }
 AI --> Service : { result: allow|block, score }
 alt allowed
-  Service -> DB : encryptPII() & insert(testimony)
+  Service -> DB : insert(testimony)
   DB --> Service : inserted record id
   Service --> API : 201 Created + id
   API --> UI : success

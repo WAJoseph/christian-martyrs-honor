@@ -18,7 +18,7 @@ package "Secondary Adapters (Outbound)" {
   rectangle "Supabase Adapter (Repository)\n(Prisma/pg)" as SupabaseAdapter
   rectangle "AI Moderation Microservice (REST)" as AIMod
   RepoPort --> SupabaseAdapter : persist/retrieve
-  Domain --> AIMod : POST /moderate (JSON)
+  Domain --> AIMod : POST /classify (JSON)
 }
 
 note left of NextApp
