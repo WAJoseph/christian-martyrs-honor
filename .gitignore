@@ -45,3 +45,9 @@ next-env.d.ts
 # test reports
 /test-results/
 playwright-report/
+
+# documentation markdown files (except README.md)
+DOCTOR_ASSESSMENT.md
+NFR_TEST_COVERAGE_MATRIX.md
+API_ENDPOINTS.md
+NFR_VERIFICATION_GUIDE.md
