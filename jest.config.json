@@ -15,12 +15,14 @@
     "testURL": "http://localhost",
     "customExportConditions": [""]
   },
-  "testMatch": [
-    "**/__tests__/**/*.[jt]s?(x)",
-    "**/?(*.)+(spec|test).[jt]s?(x)"
-  ],
+  "testMatch": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(test).[jt]s?(x)"],
   "moduleDirectories": ["node_modules", "<rootDir>"],
-  "testPathIgnorePatterns": ["<rootDir>/node_modules/", "<rootDir>/.next/"],
+  "testPathIgnorePatterns": [
+    "<rootDir>/node_modules/",
+    "<rootDir>/.next/",
+    ".*\\.spec\\.ts$",
+    "<rootDir>/e2e/"
+  ],
   "extensionsToTreatAsEsm": [".ts", ".tsx"],
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
   "globals": {

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Centralized RBAC helper for API routes
 export async function requireAdmin(request: Request) {
-  // Import the Supabase admin helper (kept in repo root `lib`)
   const { getUserFromRequest, isAdmin } = await import(
     "../../lib/supabaseAdmin"
   );

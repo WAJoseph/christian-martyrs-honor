@@ -1,0 +1,62 @@
+@startuml
+title Use-case Realization: Submit Testimony (Design-level, Ports & Adapters)
+
+actor User
+participant "Browser\n(UI Form)" as UI
+participant "Next.js App\n(API Handler - /api/testimonies)" as API
+participant "TestimonyService\n(domain)" as Service
+participant "Repository Port\n(ITestimonyRepository)" as RepoPort
+participant "Supabase Adapter\n(PrismaAdapter)" as Supabase
+participant "AI Moderation Service\n(HTTP /moderate)" as AIService
+package "AIService internals" {
+  participant "Moderation API\n(Request Handler)" as ModAPI
+  participant "Model Runner\n(Flask / Torch / FastAPI)" as Model
+  participant "Result Cache\n(Redis)" as Cache
+}
+
+== User submits testimony ==
+User -> UI : Fill form + click Submit
+UI -> API : POST /api/testimonies\n{ userId, text, images, metadata }
+activate API
+
+note over API
+  - Validate request (schema)
+  - Map to DTO/TestimonyCreate
+  - Authenticate (JWT / Supabase session)
+  - Call domain service
+end note
+
+API -> Service : submitTestimony(dto)
+activate Service
+
+note over Service
+  - Orchestrates ports:
+  - calls Repository Port to persist if allowed
+  - calls AI moderation via adapter
+end note
+
+Service -> AIService : POST /moderate\n{ text, metadata }
+activate AIService
+AIService -> ModAPI : receive request
+ModAPI -> Cache : lookup(textFingerprint)
+Cache --> ModAPI : cache miss / hit
+ModAPI -> Model : score = runModeration(text)
+Model --> ModAPI : { allow|block, score }
+ModAPI --> AIService : { result, score } 
+AIService --> Service : { result, score }
+deactivate AIService
+
+alt moderation == allow
+  Service -> RepoPort : sanitizeAndPersist(dto)
+  activate RepoPort
+  RepoPort -> Supabase : INSERT testimony via Prisma
+  Supabase --> RepoPort : savedRecord (id, createdAt ...)
+  deactivate RepoPort
+  Service --> API : 201 Created + { id }
+else moderation == block
+  Service --> API : 422 Moderation failed + reason
+end
+
+API --> UI : HTTP Response (201 or 422)
+deactivate API
+@enduml

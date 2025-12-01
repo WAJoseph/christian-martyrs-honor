@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
+import { safeJson } from "@/lib/serialize";
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +19,7 @@ export async function GET(
     if (!martyr) {
       return NextResponse.json({ error: "Martyr not found" }, { status: 404 });
     }
-    return NextResponse.json(martyr);
+    return NextResponse.json(safeJson(martyr));
   } catch (error) {
     console.error("Error fetching martyr:", error);
     return NextResponse.json(
@@ -33,6 +34,10 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const { requireAdmin } = await import("../../../../lib/rbac");
+  const unauthorizedResponse = await requireAdmin(request);
+  if (unauthorizedResponse) return unauthorizedResponse;
+
   const { id } = await context.params;
   console.log("PUT /api/martyrs/[id] called with id:", id);
   try {
@@ -71,7 +76,7 @@ export async function PUT(
         intercessoryPrayer,
       },
     });
-    return NextResponse.json(updatedMartyr);
+    return NextResponse.json(safeJson(updatedMartyr));
   } catch (error) {
     console.error("Error updating martyr:", error);
     return NextResponse.json(
@@ -86,6 +91,10 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const { requireAdmin } = await import("../../../../lib/rbac");
+  const unauthorizedResponse = await requireAdmin(request);
+  if (unauthorizedResponse) return unauthorizedResponse;
+
   const { id } = await context.params;
   console.log("DELETE /api/martyrs/[id] called with id:", id);
   try {

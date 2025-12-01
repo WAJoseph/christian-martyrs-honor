@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 import { getUserFromRequest, isAdmin } from "../../../../../lib/supabaseAdmin";
+import { safeJson } from "@/lib/serialize";
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +22,7 @@ export async function GET(
         { status: 404 }
       );
     }
-    return NextResponse.json(testimony);
+    return NextResponse.json(safeJson(testimony));
   } catch (error) {
     console.error("Error fetching testimony:", error);
     return NextResponse.json(
@@ -70,7 +71,7 @@ export async function PUT(
         featured: normFeatured,
       },
     });
-    return NextResponse.json(testimony);
+    return NextResponse.json(safeJson(testimony));
   } catch (error) {
     console.error("Error updating testimony:", error);
     return NextResponse.json(
